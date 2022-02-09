@@ -1,4 +1,4 @@
-import { Tokenize } from "./tokenizer";
+import { Tokenize } from './tokenizer';
 import {
   BangToken,
   ColonToken,
@@ -14,15 +14,15 @@ import {
   RightBracketToken,
   RightParenToken,
   Token,
-} from "./tokens";
-import { ParseError } from "./util";
+} from './tokens';
+import { ParseError } from './util';
 
 export interface ObjectTypeNode<
   Name extends string = string,
   Fields extends FieldNode[] = FieldNode[],
-  Interfaces extends string[] = string[]
+  Interfaces extends string[] = string[],
 > {
-  kind: "Object";
+  kind: 'Object';
   name: Name;
   fields: Fields;
   interfaces: Interfaces;
@@ -31,42 +31,36 @@ export interface ObjectTypeNode<
 export interface InterfaceTypeNode<
   Name extends string = string,
   Fields extends FieldNode[] = FieldNode[],
-  Interfaces extends string[] = string[]
+  Interfaces extends string[] = string[],
 > {
-  kind: "Interface";
+  kind: 'Interface';
   name: Name;
   fields: Fields;
   interfaces: Interfaces;
 }
 
-export interface UnionTypeNode<
-  Name extends string = string,
-  Members extends string[] = string[]
-> {
-  kind: "Union";
+export interface UnionTypeNode<Name extends string = string, Members extends string[] = string[]> {
+  kind: 'Union';
   name: Name;
   members: Members;
 }
 
 export interface ScalarTypeNode<Name extends string = string> {
-  kind: "Scalar";
+  kind: 'Scalar';
   name: Name;
 }
 
-export interface EnumTypeNode<
-  Name extends string = string,
-  Values extends string[] = string[]
-> {
-  kind: "Enum";
+export interface EnumTypeNode<Name extends string = string, Values extends string[] = string[]> {
+  kind: 'Enum';
   name: Name;
   values: Values;
 }
 
 export interface InputTypeNode<
   Name extends string = string,
-  Fields extends InputFieldNode[] = InputFieldNode[]
+  Fields extends InputFieldNode[] = InputFieldNode[],
 > {
-  kind: "Input";
+  kind: 'Input';
   name: Name;
   fields: Fields;
 }
@@ -74,9 +68,9 @@ export interface InputTypeNode<
 export interface FieldNode<
   Name extends string = string,
   Args extends ArgNode[] = ArgNode[],
-  Type extends TypeRefNode = TypeRefNode
+  Type extends TypeRefNode = TypeRefNode,
 > {
-  kind: "Field";
+  kind: 'Field';
   name: Name;
   args: Args;
   type: Type;
@@ -84,18 +78,15 @@ export interface FieldNode<
 
 export interface InputFieldNode<
   Name extends string = string,
-  Type extends TypeRefNode = TypeRefNode
+  Type extends TypeRefNode = TypeRefNode,
 > {
-  kind: "Field";
+  kind: 'Field';
   name: Name;
   type: Type;
 }
 
-export interface ArgNode<
-  Name extends string = string,
-  Type extends TypeRefNode = TypeRefNode
-> {
-  kind: "Arg";
+export interface ArgNode<Name extends string = string, Type extends TypeRefNode = TypeRefNode> {
+  kind: 'Arg';
   name: Name;
   type: Type;
 }
@@ -104,9 +95,9 @@ export interface TypeRefNode<
   Name extends string = string,
   NonNull extends boolean = boolean,
   List extends boolean = boolean,
-  ListItemNonNull extends boolean = boolean
+  ListItemNonNull extends boolean = boolean,
 > {
-  kind: "TypeRef";
+  kind: 'TypeRef';
   name: Name;
   nonNull: NonNull;
   list: List;
@@ -152,41 +143,32 @@ export type ParseStatements<T, Types extends TypeNode[]> = [] extends T
 
 export type AddType<
   T extends TypeResult | ParseError,
-  Types extends TypeNode[]
-> = T extends TypeResult
-  ? ParseStatements<T["Rest"], [...Types, T["Type"]]>
-  : UnexpectedToken<T>;
-
-export type ParseType<
-  Type extends string,
   Types extends TypeNode[],
-  T
-> = Type extends "type"
+> = T extends TypeResult ? ParseStatements<T['Rest'], [...Types, T['Type']]> : UnexpectedToken<T>;
+
+export type ParseType<Type extends string, Types extends TypeNode[], T> = Type extends 'type'
   ? AddType<ParseObjectType<T>, Types>
-  : Type extends "interface"
+  : Type extends 'interface'
   ? AddType<ParseInterfaceType<T>, Types>
-  : Type extends "union"
+  : Type extends 'union'
   ? AddType<ParseUnionType<T>, Types>
-  : Type extends "scalar"
+  : Type extends 'scalar'
   ? AddType<ParseScalarType<T>, Types>
-  : Type extends "enum"
+  : Type extends 'enum'
   ? AddType<ParseEnumType<T>, Types>
-  : Type extends "input"
+  : Type extends 'input'
   ? AddType<ParseInputType<T>, Types>
   : ParseError<`Unknown keyword ${Type}`>;
 
 export type UnexpectedToken<T> = T extends Token
-  ? ParseError<`Unexpected ${T["kind"]} token (\`${T["value"]}\`)`>
+  ? ParseError<`Unexpected ${T['kind']} token (\`${T['value']}\`)`>
   : T extends unknown[]
   ? UnexpectedToken<T[0]>
   : T extends ParseError<string>
   ? T
-  : ParseError<"Unexpected token">;
+  : ParseError<'Unexpected token'>;
 
-export type ParseObjectType<T> = T extends [
-  NameToken<infer Name>,
-  ...infer Rest
-]
+export type ParseObjectType<T> = T extends [NameToken<infer Name>, ...infer Rest]
   ? ParseImplements<Consume<Rest, CommentToken>> extends {
       Rest: infer R2;
       Interfaces: infer Interfaces;
@@ -196,20 +178,17 @@ export type ParseObjectType<T> = T extends [
         ? {
             Type: ObjectTypeNode<
               Name,
-              Block["Fields"],
+              Block['Fields'],
               Interfaces extends string[] ? Interfaces : []
             >;
-            Rest: Block["Rest"];
+            Rest: Block['Rest'];
           }
         : Block
       : never
     : never
   : UnexpectedToken<T>;
 
-export type ParseInterfaceType<T> = T extends [
-  NameToken<infer Name>,
-  ...infer Rest
-]
+export type ParseInterfaceType<T> = T extends [NameToken<infer Name>, ...infer Rest]
   ? ParseImplements<Consume<Rest, CommentToken>> extends {
       Rest: infer R2;
       Interfaces: infer Interfaces;
@@ -219,10 +198,10 @@ export type ParseInterfaceType<T> = T extends [
         ? {
             Type: InterfaceTypeNode<
               Name,
-              Block["Fields"],
+              Block['Fields'],
               Interfaces extends string[] ? Interfaces : []
             >;
-            Rest: Block["Rest"];
+            Rest: Block['Rest'];
           }
         : Block
       : never
@@ -233,17 +212,14 @@ export type ParseInputType<T> = T extends [NameToken<infer Name>, ...infer Rest]
   ? ParseInputFieldBlock<Consume<Rest, CommentToken>> extends infer Block
     ? Block extends InputFieldBlockResult
       ? {
-          Type: InputTypeNode<Name, Block["Fields"]>;
-          Rest: Block["Rest"];
+          Type: InputTypeNode<Name, Block['Fields']>;
+          Rest: Block['Rest'];
         }
       : Block
     : never
   : UnexpectedToken<T>;
 
-export type ParseScalarType<T> = T extends [
-  NameToken<infer Name>,
-  ...infer Rest
-]
+export type ParseScalarType<T> = T extends [NameToken<infer Name>, ...infer Rest]
   ? { Type: ScalarTypeNode<Name>; Rest: Rest }
   : UnexpectedToken<T>;
 
@@ -255,53 +231,40 @@ export type ParseUnionType<T> = T extends [
 ]
   ? ParseUnionMembers<Rest, [Member]> extends infer R
     ? R extends MembersResult
-      ? { Type: UnionTypeNode<Name, R["Members"]>; Rest: R["Rest"] }
+      ? { Type: UnionTypeNode<Name, R['Members']>; Rest: R['Rest'] }
       : R
     : never
   : UnexpectedToken<T>;
 
-export type ParseUnionMembers<T, Acc extends string[]> = T extends [
-  PipeToken,
-  ...infer Rest
-]
+export type ParseUnionMembers<T, Acc extends string[]> = T extends [PipeToken, ...infer Rest]
   ? Rest extends [NameToken<infer Name>, ...infer R2]
     ? ParseUnionMembers<R2, [...Acc, Name]>
     : UnexpectedToken<Rest>
   : { Rest: T; Members: Acc };
 
-export type ParseEnumType<T> = T extends [
-  NameToken<infer Name>,
-  LeftBraceToken,
-  ...infer Rest
-]
+export type ParseEnumType<T> = T extends [NameToken<infer Name>, LeftBraceToken, ...infer Rest]
   ? ParseEnumValues<Rest, []> extends infer R
     ? R extends EnumValuesResult
-      ? { Type: EnumTypeNode<Name, R["Values"]>; Rest: R["Rest"] }
+      ? { Type: EnumTypeNode<Name, R['Values']>; Rest: R['Rest'] }
       : R
     : never
   : UnexpectedToken<T>;
 
-export type ParseEnumValues<T, Acc extends string[]> = T extends [
-  RightBraceToken,
-  ...infer Rest
-]
+export type ParseEnumValues<T, Acc extends string[]> = T extends [RightBraceToken, ...infer Rest]
   ? { Rest: Rest; Values: Acc }
   : T extends [NameToken<infer Name>, ...infer Rest]
   ? ParseEnumValues<Rest, [...Acc, Name]>
   : UnexpectedToken<T>;
 
 export type ParseImplements<T> = T extends [
-  NameToken<"implements">,
+  NameToken<'implements'>,
   NameToken<infer Name>,
   ...infer Rest
 ]
   ? ParseImplementList<Rest, [Name]>
   : { Rest: T; Interfaces: [] };
 
-export type ParseImplementList<T, Acc extends string[]> = T extends [
-  CommaToken,
-  ...infer Rest
-]
+export type ParseImplementList<T, Acc extends string[]> = T extends [CommaToken, ...infer Rest]
   ? Rest extends [NameToken<infer Name>, ...infer R2]
     ? ParseImplementList<R2, [...Acc, Name]>
     : UnexpectedToken<Rest>
@@ -318,7 +281,7 @@ export type ParseFields<T, Acc extends FieldNode[]> = T extends [
 ]
   ? ParseArgs<Consume<Rest, CommentToken>, []> extends infer R
     ? R extends ArgsResult
-      ? ParseField<Name, R["Args"], R["Rest"], Acc>
+      ? ParseField<Name, R['Args'], R['Rest'], Acc>
       : R
     : never
   : T extends [NameToken<infer Name>, ...infer Rest]
@@ -331,19 +294,16 @@ export type ParseField<
   Name extends string,
   Args extends ArgNode[],
   T,
-  Acc extends FieldNode[]
+  Acc extends FieldNode[],
 > = T extends [ColonToken, ...infer Rest]
   ? ParseTypeRef<Rest> extends infer R
     ? R extends TypeRefResult
-      ? ParseFields<R["Rest"], [...Acc, FieldNode<Name, Args, R["Ref"]>]>
+      ? ParseFields<R['Rest'], [...Acc, FieldNode<Name, Args, R['Ref']>]>
       : R
     : never
   : UnexpectedToken<T>;
 
-export type ParseArgs<T, Acc extends ArgNode[]> = T extends [
-  RightParenToken,
-  ...infer Rest
-]
+export type ParseArgs<T, Acc extends ArgNode[]> = T extends [RightParenToken, ...infer Rest]
   ? { Args: Acc; Rest: Rest }
   : T extends [
       ...([] extends Acc ? [] : [CommaToken]),
@@ -353,7 +313,7 @@ export type ParseArgs<T, Acc extends ArgNode[]> = T extends [
     ]
   ? ParseTypeRef<Rest> extends infer R
     ? R extends TypeRefResult
-      ? ParseArgs<R["Rest"], [...Acc, ArgNode<Name, R["Ref"]>]>
+      ? ParseArgs<R['Rest'], [...Acc, ArgNode<Name, R['Ref']>]>
       : R
     : never
   : UnexpectedToken<T>;
@@ -371,14 +331,13 @@ export type ParseInputFields<T, Acc extends InputFieldNode[]> = T extends [
   ? { Rest: Rest; Fields: Acc }
   : UnexpectedToken<T>;
 
-export type ParseInputField<
-  Name extends string,
-  T,
-  Acc extends InputFieldNode[]
-> = T extends [ColonToken, ...infer Rest]
+export type ParseInputField<Name extends string, T, Acc extends InputFieldNode[]> = T extends [
+  ColonToken,
+  ...infer Rest
+]
   ? ParseTypeRef<Rest> extends infer R
     ? R extends TypeRefResult
-      ? ParseInputFields<R["Rest"], [...Acc, InputFieldNode<Name, R["Ref"]>]>
+      ? ParseInputFields<R['Rest'], [...Acc, InputFieldNode<Name, R['Ref']>]>
       : R
     : never
   : UnexpectedToken<T>;
@@ -392,39 +351,27 @@ export type ParseTypeRef<T> = T extends [
   ...infer Rest
 ]
   ? Name extends NameToken
-    ? { Rest: Rest; Ref: TypeRefNode<Name["value"], true, true, true> }
+    ? { Rest: Rest; Ref: TypeRefNode<Name['value'], true, true, true> }
     : UnexpectedToken<Name>
-  : T extends [
-      LeftBracketToken,
-      infer Name,
-      RightBracketToken,
-      BangToken,
-      ...infer Rest
-    ]
+  : T extends [LeftBracketToken, infer Name, RightBracketToken, BangToken, ...infer Rest]
   ? Name extends NameToken
-    ? { Rest: Rest; Ref: TypeRefNode<Name["value"], true, true, false> }
+    ? { Rest: Rest; Ref: TypeRefNode<Name['value'], true, true, false> }
     : UnexpectedToken<Name>
-  : T extends [
-      LeftBracketToken,
-      infer Name,
-      BangToken,
-      RightBracketToken,
-      ...infer Rest
-    ]
+  : T extends [LeftBracketToken, infer Name, BangToken, RightBracketToken, ...infer Rest]
   ? Name extends NameToken
-    ? { Rest: Rest; Ref: TypeRefNode<Name["value"], false, true, true> }
+    ? { Rest: Rest; Ref: TypeRefNode<Name['value'], false, true, true> }
     : UnexpectedToken<Name>
   : T extends [LeftBracketToken, infer Name, RightBracketToken, ...infer Rest]
   ? Name extends NameToken
-    ? { Rest: Rest; Ref: TypeRefNode<Name["value"], false, true, false> }
+    ? { Rest: Rest; Ref: TypeRefNode<Name['value'], false, true, false> }
     : UnexpectedToken<Name>
   : T extends [infer Name, BangToken, ...infer Rest]
   ? Name extends NameToken
-    ? { Rest: Rest; Ref: TypeRefNode<Name["value"], true, false, false> }
+    ? { Rest: Rest; Ref: TypeRefNode<Name['value'], true, false, false> }
     : UnexpectedToken<Name>
   : T extends [infer Name, ...infer Rest]
   ? Name extends NameToken
-    ? { Rest: Rest; Ref: TypeRefNode<Name["value"], false, false, false> }
+    ? { Rest: Rest; Ref: TypeRefNode<Name['value'], false, false, false> }
     : UnexpectedToken<Name>
   : UnexpectedToken<T>;
 
